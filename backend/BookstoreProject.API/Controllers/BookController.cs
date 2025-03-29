@@ -15,9 +15,14 @@ namespace BookstoreProject.API.Controllers
         public BookController(BookStoreContext temp) => _context = temp;
         
         [HttpGet]
-        public IActionResult GetBooks(int pageSize = 5, int pageNum = 1, bool sortAscending = true)
+        public IActionResult GetBooks(int pageSize = 5, int pageNum = 1, bool sortAscending = true, [FromQuery] List<string>? bookCategory = null)
         {
             var booksQuery = _context.Books.AsQueryable();
+            
+            if (bookCategory != null && bookCategory.Any())
+            {
+                booksQuery = booksQuery.Where(b => bookCategory.Contains(b.Category));
+            }
 
             booksQuery = sortAscending 
                 ? booksQuery.OrderByDescending(x => x.Title) 
@@ -35,9 +40,21 @@ namespace BookstoreProject.API.Controllers
                 Books = books,
                 TotalNumBooks = totalNumBooks
             };
-            
+
             return Ok(response);
         }
+
+        [HttpGet("GetBookTypes")]
+        public IActionResult GetBookTypes()
+        {
+            var bookTypes = _context.Books
+                .Select(b => b.Category)
+                .Distinct()
+                .ToList();
+                
+            return Ok(bookTypes);
+        }
+        
         
     }
     
