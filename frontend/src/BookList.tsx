@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Book } from "./types/Book";
 
-function BookList() {
+
+function BookList({selectedCategories}: {selectedCategories: string[]}) {
 
     const [books, setBooks] = useState<Book[]>([])
     const [pageSize, setPageSize] = useState<number>(5);
@@ -12,8 +13,11 @@ function BookList() {
 
     useEffect(() => {
         const fetchBooks = async () => {
+
+            const categoryParams = selectedCategories.map((cat) => `bookCategory=${encodeURIComponent(cat)}`).join('&');
+
             const response = await fetch(
-                `https://localhost:5000/Book?pageSize=${pageSize}&pageNum=${pageNum}&sortAscending=${isAscending}`
+                `https://localhost:5000/Book?pageSize=${pageSize}&pageNum=${pageNum}&sortAscending=${isAscending}${selectedCategories.length ? `&${categoryParams}`: ''}`
             );
             const data = await response.json();
             setBooks(data.books);
@@ -22,18 +26,15 @@ function BookList() {
         };
 
         fetchBooks();
-    },[pageSize, pageNum, totalItems, isAscending]);
+    },[pageSize, pageNum, totalItems, isAscending, selectedCategories]);
 
     const sortBooksByTitle = () => {
         setIsAscending(!isAscending);
     };
 
+    
     return (
         <>
-            <h1>Book List</h1>
-
-            <br/>
-
             <div>
                 <button onClick={sortBooksByTitle} className="mb-3">
                     Sort by Title {isAscending ? "▲" : "▼"}
