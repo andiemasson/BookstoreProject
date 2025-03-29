@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Book } from "./types/Book";
+import { Book } from "../types/Book";
+import { useNavigate } from "react-router-dom";
 
 
 function BookList({selectedCategories}: {selectedCategories: string[]}) {
@@ -10,6 +11,7 @@ function BookList({selectedCategories}: {selectedCategories: string[]}) {
     const [totalItems, setTotalItems] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [isAscending, setIsAscending] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchBooks = async () => {
@@ -55,6 +57,8 @@ function BookList({selectedCategories}: {selectedCategories: string[]}) {
                             <li><strong>Number of Pages: </strong>{b.pageCount}</li>
                             <li><strong>Price: </strong>${b.price}</li>
                         </ul>
+
+                        <button className="btn" onClick={() => navigate(`/add/${b.title}/${b.bookId}/${b.price}`)}>Add to Cart</button>
                     </div>
                 </div>
             ))}

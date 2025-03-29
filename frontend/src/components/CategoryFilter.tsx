@@ -16,11 +16,10 @@ function CategoryFilter ({
                 const data = await response.json();
                 console.log('Fetched Categories:', data);
                 setCategories(data);
-            }
-            catch (error) {
+            }catch (error) {
                 console.error('Error fetching categories', error);
             }
-        }
+        };
 
         fetchCategories();
     }, [])
