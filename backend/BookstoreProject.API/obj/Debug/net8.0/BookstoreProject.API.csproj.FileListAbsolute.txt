@@ -66,3 +66,4 @@
 /Users/andieclegg/Desktop/BookstoreProject/backend/BookstoreProject.API/obj/Debug/net8.0/BookstoreProject.API.genruntimeconfig.cache
 /Users/andieclegg/Desktop/BookstoreProject/backend/BookstoreProject.API/obj/Debug/net8.0/ref/BookstoreProject.API.dll
 /Users/andieclegg/Desktop/BookstoreProject/backend/BookstoreProject.API/obj/Debug/net8.0/BookstoreProject.API.sourcelink.json
+/Users/andieclegg/Desktop/BookstoreProject/backend/BookstoreProject.API/bin/Debug/net8.0/Bookstore.sqlite

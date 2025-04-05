@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Book } from "../types/Book";
 import { useNavigate } from "react-router-dom";
+import { FetchBooks } from "../api/BooksAPI";
+import Pagination from './Pagination'
 
 
 function BookList({selectedCategories}: {selectedCategories: string[]}) {
@@ -8,41 +10,36 @@ function BookList({selectedCategories}: {selectedCategories: string[]}) {
     const [books, setBooks] = useState<Book[]>([])
     const [pageSize, setPageSize] = useState<number>(5);
     const [pageNum, setPageNum] = useState<number>(1);
-    const [totalItems, setTotalItems] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
-    const [isAscending, setIsAscending] = useState<boolean>(true);
     const navigate = useNavigate();
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchBooks = async () => {
-
-            const categoryParams = selectedCategories.map((cat) => `bookCategory=${encodeURIComponent(cat)}`).join('&');
-
-            const response = await fetch(
-                `https://localhost:5000/Book?pageSize=${pageSize}&pageNum=${pageNum}&sortAscending=${isAscending}${selectedCategories.length ? `&${categoryParams}`: ''}`
-            );
-            const data = await response.json();
-            setBooks(data.books);
-            setTotalItems(data.totalNumBooks);
-            setTotalPages(Math.ceil(totalItems/pageSize));
+        const loadBooks = async () => {
+            try{
+                setLoading(true);
+                const data = await FetchBooks(pageSize, pageNum, selectedCategories);
+            
+                setBooks(data.books);
+                setTotalPages(Math.ceil(data.totalNumBooks / pageSize));
+            } catch (error) {
+                setError((error as Error).message)
+            } finally{
+                setLoading(false);
+            }
         };
 
-        fetchBooks();
-    },[pageSize, pageNum, totalItems, isAscending, selectedCategories]);
+        loadBooks();
+    },[pageSize, pageNum, selectedCategories]);
 
-    const sortBooksByTitle = () => {
-        setIsAscending(!isAscending);
-    };
+    if (loading) return <p>Loading books...</p>
+    if (error) return <p className="text-red-500">Error: {error}</p>
+
 
     
     return (
         <>
-            <div>
-                <button onClick={sortBooksByTitle} className="mb-3">
-                    Sort by Title {isAscending ? "▲" : "▼"}
-                </button>
-            </div>
-
             <br/>
             {books.map((b)=> (
                 <div id="bookCard" className="card" key={b.bookId}>
@@ -63,32 +60,16 @@ function BookList({selectedCategories}: {selectedCategories: string[]}) {
                 </div>
             ))}
 
-            <br/>
-            <button disabled={pageNum === 1} onClick={() => setPageNum(pageNum - 1)}>Back</button>
-
-            {[...Array(totalPages)].map((_, i) => (
-                <button key={i+1} onClick={() => setPageNum(i+1)} disabled={pageNum === (i+1)}>
-                    {i+1}
-                </button>
-            ))}
-
-            <button disabled={pageNum === totalPages} onClick={() => setPageNum(pageNum + 1)}>Next</button>
-
-            <br/>
-            <br/>
-            <label>
-                Results per page:
-                <select 
-                    value={pageSize} 
-                    onChange={(p) => {
-                        setPageSize(Number(p.target.value));
-                        setPageNum(1);
-                    }}
-                >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                </select>
-            </label>
+            <Pagination 
+                currentPage={pageNum} 
+                totalPages={totalPages} 
+                pageSize={pageSize} 
+                onPageChange={setPageNum} 
+                onPageSizeChange={(newSize) => {
+                    setPageSize(newSize); 
+                    setPageNum(1);
+                }}
+            />
         </>
     );
 }
